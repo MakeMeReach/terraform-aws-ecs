@@ -10,7 +10,7 @@ The module [service](./service/main.tf) provision:
 Service without load balancer:
 ```
 module "worker" {
-  source = "https://github.com/MakeMeReach/terraform-aws-ecs//service"
+  source = "github.com/MakeMeReach/terraform-aws-ecs//service"
 
   name = "worker"
   ecs_cluster_id = "<ECS cluster ARN the task and service will run on>"
@@ -97,7 +97,7 @@ EOF
 }
 
 module "api" {
-  source = "https://github.com/MakeMeReach/terraform-aws-ecs//service"
+  source = "github.com/MakeMeReach/terraform-aws-ecs//service"
 
   name = "api"
   ecs_cluster_id = "<ECS cluster ARN the task and service will run on>"
