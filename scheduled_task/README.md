@@ -23,7 +23,7 @@ Simple usage:
  * Periodically runs a job
  */
 module "schedule_task_1" {
-  source = "https://github.com/Rowern/terraform-aws-ecs-scheduled-task//scheduled_task"
+  source = "https://github.com/MakeMeReach/terraform-aws-ecs//scheduled_task"
 
   name = "task_1"
   ecs_cluster_arn = "<ecs cluster arn>"
@@ -67,7 +67,7 @@ This is the best solution if you only schedule a task once.
  * in the first scheduled_task
  */
 module "schedule_task_1" {
-  source = "https://github.com/Rowern/terraform-aws-ecs-scheduled-task//scheduled_task"
+  source = "https://github.com/MakeMeReach/terraform-aws-ecs//scheduled_task"
 
   name = "task_1"
   ecs_cluster_arn = "<ecs cluster arn>"
@@ -90,7 +90,7 @@ module "schedule_task_1" {
 }
 
 module "schedule_task_2" {
-  source = "https://github.com/Rowern/terraform-aws-ecs-scheduled-task//scheduled_task"
+  source = "https://github.com/MakeMeReach/terraform-aws-ecs//scheduled_task"
 
   name = "task_2"
   ecs_cluster_arn = "<ecs cluster arn>"
@@ -166,7 +166,7 @@ DOC
  * Create a single IAM role for the task and pass it along to all scheduled tasks
  */
 module "schedule_task_1" {
-  source = "https://github.com/Rowern/terraform-aws-ecs-scheduled-task//scheduled_task"
+  source = "https://github.com/MakeMeReach/terraform-aws-ecs//scheduled_task"
 
   name = "task_1"
   ecs_cluster_arn = "<ecs cluster arn>"
@@ -190,7 +190,7 @@ module "schedule_task_1" {
 }
 
 module "schedule_task_2" {
-  source = "https://github.com/Rowern/terraform-aws-ecs-scheduled-task//scheduled_task"
+  source = "https://github.com/MakeMeReach/terraform-aws-ecs//scheduled_task"
 
   name = "task_2"
   ecs_cluster_arn = "<ecs cluster arn>"
