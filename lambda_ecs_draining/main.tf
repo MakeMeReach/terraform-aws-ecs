@@ -7,16 +7,6 @@ variable "tags_as_map" {
   description = "(optional) A map of tags to apply to created resources."
 }
 
-/*
-We need to handle the fact that ECS does not correctly prepare itself in case of scale in from the cluster asg. (https://aws.amazon.com/blogs/compute/how-to-automate-container-instance-draining-in-amazon-ecs/)
-
-So what we will do:
- - had a lifecycle hook on instance terminate that will post to a SNS topic
- - a Lambda will be subscribed to this
- - it will detect scale in events and manually tag ecs instance concerned as DRAINING
-
-By having a lifecycle hook we will postpone instance deletion until it is completed.
-*/
 resource "aws_iam_role" "iam_role_for_ecs_cluster_lambda" {
   name_prefix = "iam_for_ecs_cluster_lambda"
 
