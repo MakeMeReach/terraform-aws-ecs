@@ -99,7 +99,7 @@ module "autoscaling_cluster" {
 
 resource "aws_iam_role" "iam_role_for_asg_lifecycle" {
   count = "${var.sns_topic_arn == "" ? 0 : 1}"
-  name  = "iam_role_for_asg_lifecycle"
+  name_prefix  = "iam_role_for_asg_lifecycle"
 
   description = "Autoscaling role for lifecycle (ecs cluster)"
 
