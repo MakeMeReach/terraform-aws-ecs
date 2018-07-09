@@ -84,6 +84,8 @@ module "autoscaling_cluster" {
   max_size            = "${var.instance_count}"
   desired_capacity    = "${var.instance_count}"
 
+  recreate_asg_when_lc_changes = true
+
   enabled_metrics = [
     "GroupMinSize",
     "GroupMaxSize",
