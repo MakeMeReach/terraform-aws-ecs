@@ -54,6 +54,20 @@ variable "sns_topic_arn" {
   description = "(optional) An ARN to notify when the ASG in scaling in (see the ecs_lambda module for an explanation)"
 }
 
+locals {
+  tags_asg_format = ["${null_resource.tags_as_list_of_maps.*.triggers}"]
+}
+
+resource "null_resource" "tags_as_list_of_maps" {
+  count = "${length(keys(var.tags_as_map))}"
+
+  triggers = "${map(
+    "key", "${element(keys(var.tags_as_map), count.index)}",
+    "value", "${element(values(var.tags_as_map), count.index)}",
+    "propagate_at_launch", "true"
+  )}"
+}
+
 data "aws_ssm_parameter" "foo" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux/recommended"
 }
@@ -67,24 +81,29 @@ data "template_file" "user_data" {
   }
 }
 
-module "autoscaling_cluster" {
-  source = "github.com/terraform-aws-modules/terraform-aws-autoscaling"
-
-  name = "${var.name}"
-
+resource "aws_launch_configuration" "autoscaling_cluster" {
+  name_prefix = "${var.name}"
   image_id             = "${var.instance_ami == "" ? replace(data.aws_ssm_parameter.foo.value, "/.*\"image_id\":\"(ami-[a-zA-Z0-9]+)\",\".*/", "$1") : var.instance_ami}"
   instance_type        = "${var.instance_type}"
+
   security_groups      = ["${var.instance_security_groups_ids}"]
   iam_instance_profile = "${var.instance_iam_profile}"
+
   user_data            = "${data.template_file.user_data.rendered}"
 
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_autoscaling_group" "autoscaling_cluster" {
+  name                = "${aws_launch_configuration.autoscaling_cluster.name}"
+  launch_configuration = "${aws_launch_configuration.autoscaling_cluster.name}"
   vpc_zone_identifier = ["${var.subnet_ids}"]
   health_check_type   = "EC2"
   min_size            = "${var.instance_count}"
   max_size            = "${var.instance_count}"
   desired_capacity    = "${var.instance_count}"
-
-  recreate_asg_when_lc_changes = true
 
   enabled_metrics = [
     "GroupMinSize",
@@ -96,7 +115,18 @@ module "autoscaling_cluster" {
     "GroupTotalInstances",
   ]
 
-  tags_as_map = "${var.tags_as_map}"
+  tags = ["${concat(
+    list(map("key", "Name", "value", var.name, "propagate_at_launch", true)),
+    local.tags_asg_format
+  )}"]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  timeouts {
+    delete = "1h"
+  }
 }
 
 resource "aws_iam_role" "iam_role_for_asg_lifecycle" {
@@ -132,7 +162,7 @@ resource "aws_autoscaling_lifecycle_hook" "asg_cluster_lifecycle_scale_in" {
   count = "${var.sns_topic_arn == "" ? 0 : 1}"
 
   name                   = "lifecycle_handle_ecs_cluster_downscale"
-  autoscaling_group_name = "${module.autoscaling_cluster.this_autoscaling_group_name}"
+  autoscaling_group_name = "${aws_autoscaling_group.autoscaling_cluster.name}"
   default_result         = "CONTINUE"
   heartbeat_timeout      = 900
   lifecycle_transition   = "autoscaling:EC2_INSTANCE_TERMINATING"
