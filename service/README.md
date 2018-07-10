@@ -119,6 +119,8 @@ module "api" {
 EOF
   ecs_service_desired_count = 1
   ecs_service_role_arn = "${aws_iam_role.ecs_service_role.arn}"
+
+  has_target_group = true
   alb_target_group_arn = "<ARN of the target group your docker should register to>"
 }
 ```
