@@ -90,6 +90,8 @@ resource "aws_lambda_function" "lambda_handle_ecs_cluster_downscale" {
   timeout = 300
 
   tags = "${merge(map("Name", "lambda_handle_ecs_cluster_downscale"), var.tags_as_map)}"
+
+  ignore_changes = ["last_modified", "filename"]
 }
 
 resource "aws_sns_topic" "sns_ecs_cluster_lifecycle" {
