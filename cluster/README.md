@@ -38,6 +38,7 @@ module "cluster" {
     Hello = "World"
   }
 
+  has_topic_arn = true
   sns_topic_arn = "${module.ecs_lambda.sns_topic_arn}"
 }
 ```

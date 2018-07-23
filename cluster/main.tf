@@ -49,6 +49,10 @@ variable "tags_as_map" {
   description = "(optional) A map of tags to apply to created resources"
 }
 
+variable "has_topic_arn" {
+  description = "(optional) Do you provide an ARN. (required if `sns_topic_arn` is set)"
+  default = false
+}
 variable "sns_topic_arn" {
   default     = ""
   description = "(optional) An ARN to notify when the ASG in scaling in (see the ecs_lambda module for an explanation)"
@@ -130,7 +134,7 @@ resource "aws_autoscaling_group" "autoscaling_cluster" {
 }
 
 resource "aws_iam_role" "iam_role_for_asg_lifecycle" {
-  count = "${var.sns_topic_arn == "" ? 0 : 1}"
+  count = "${var.has_topic_arn}"
   name_prefix  = "iam_role_for_asg_lifecycle"
 
   description = "Autoscaling role for lifecycle (ecs cluster)"
@@ -153,13 +157,13 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "iam_role_for_asg_lifecycle" {
-  count      = "${var.sns_topic_arn == "" ? 0 : 1}"
+  count      = "${var.has_topic_arn}"
   role       = "${aws_iam_role.iam_role_for_asg_lifecycle.name}"
   policy_arn = "arn:aws:iam::aws:policy/service-role/AutoScalingNotificationAccessRole"
 }
 
 resource "aws_autoscaling_lifecycle_hook" "asg_cluster_lifecycle_scale_in" {
-  count = "${var.sns_topic_arn == "" ? 0 : 1}"
+  count = "${var.has_topic_arn}"
 
   name                   = "lifecycle_handle_ecs_cluster_downscale"
   autoscaling_group_name = "${aws_autoscaling_group.autoscaling_cluster.name}"
