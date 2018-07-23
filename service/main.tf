@@ -39,8 +39,8 @@ variable "ecs_service_role_arn" {
 }
 
 variable "has_target_group" {
-  description = "(optional) Does the service needs to be plugged to a target group. (required if `alb_target_group_arn` is set)"
-  default = false
+  description = "(optional) Does the service needs to be plugged to a target group. (required = 1, if `alb_target_group_arn` is set)"
+  default = 0
 }
 variable "alb_target_group_arn" {
   description = "(optional) The target group to attach to the service."
@@ -85,7 +85,7 @@ EOF
 }
 
 resource "aws_ecs_service" "service" {
-  count = "${!var.has_target_group ? 1 : 0}"
+  count = "${1 - var.has_target_group}"
 
   name            = "${var.name}"
   cluster         = "${var.ecs_cluster_id}"
@@ -98,7 +98,7 @@ resource "aws_ecs_service" "service" {
 }
 
 resource "aws_ecs_service" "service_with_target_group" {
-  count = "${var.has_target_group ? 1 : 0}"
+  count = "${var.has_target_group}"
 
   name            = "${var.name}"
   cluster         = "${var.ecs_cluster_id}"
