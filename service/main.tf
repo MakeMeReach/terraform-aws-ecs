@@ -18,6 +18,11 @@ variable "ecs_task_memory" {
   description = "(required) The maximum amount of memory for this task."
 }
 
+variable "ecs_task_role_arn" {
+  default     = ""
+  description = "(optional) The ARN role to assign for the task."
+}
+
 variable "ecs_task_docker_port" {
   default     = ""
   description = "(optional) The port exposed by this docker. Only required if used with a load balancer."
@@ -69,6 +74,8 @@ EOF
 
 resource "aws_ecs_task_definition" "task" {
   family = "${var.name}"
+
+  task_role_arn = "${var.ecs_task_role_arn}"
 
   container_definitions = <<EOF
 [
