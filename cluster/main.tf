@@ -96,6 +96,10 @@ resource "aws_launch_configuration" "autoscaling_cluster" {
   security_groups      = ["${var.instance_security_groups_ids}"]
   iam_instance_profile = "${var.instance_iam_profile}"
 
+  root_block_device {
+    volume_size = "${var.root_block_device_volume_size}"
+  }
+
   user_data            = "${data.template_file.user_data.rendered}"
 
   lifecycle {
@@ -111,10 +115,6 @@ resource "aws_autoscaling_group" "autoscaling_cluster" {
   min_size            = "${var.instance_count}"
   max_size            = "${var.instance_count}"
   desired_capacity    = "${var.instance_count}"
-  
-  root_block_device {
-    volume_size = "${var.root_block_device_volume_size}"
-  }
 
   enabled_metrics = [
     "GroupMinSize",
