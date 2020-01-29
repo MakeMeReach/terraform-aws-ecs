@@ -72,6 +72,16 @@ locals {
 EOF
 }
 
+resource "aws_cloudwatch_log_group" "task_log" {
+    name = "/ecs/legacy/${var.name}"
+    retention_in_days = "7"
+    tags {
+        Application = "legacy"
+        Environment = "prod"
+        Service = "${var.name}"
+    }
+}
+
 resource "aws_ecs_task_definition" "task" {
   family = "${var.name}"
 
@@ -82,6 +92,13 @@ resource "aws_ecs_task_definition" "task" {
   {
     "name": "${var.name}",
     "image": "${var.ecs_task_docker_image}",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+          "awslogs-group" : "${aws_cloudwatch_log_group.task_log.name}",
+          "awslogs-region": "eu-west-2"
+      }
+    },
     "memoryReservation": ${var.ecs_task_memory_reservation},
     "memory": ${var.ecs_task_memory}
     ${var.ecs_task_docker_port == "" ? "" : ",${local.port_mappings}"}
