@@ -57,6 +57,9 @@ variable "sns_topic_arn" {
   default     = ""
   description = "(optional) An ARN to notify when the ASG in scaling in (see the ecs_lambda module for an explanation)"
 }
+variable "root_block_device_volume_size" {
+  default = 32
+}
 
 locals {
   tags_asg_format = ["${null_resource.tags_as_list_of_maps.*.triggers}"]
@@ -108,6 +111,10 @@ resource "aws_autoscaling_group" "autoscaling_cluster" {
   min_size            = "${var.instance_count}"
   max_size            = "${var.instance_count}"
   desired_capacity    = "${var.instance_count}"
+  
+  root_block_device {
+    volume_size = "${var.root_block_device_volume_size}"
+  }
 
   enabled_metrics = [
     "GroupMinSize",
